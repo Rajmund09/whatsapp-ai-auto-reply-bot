@@ -1,0 +1,10 @@
+# Run:
+
+    pip freeze > requirements.txt
+
+# Or manually:
+
+    pyautogui
+    pyperclip
+    groq
+    python-dotenv
