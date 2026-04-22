@@ -1,0 +1,7 @@
+pyautogui
+pyperclip
+groq
+python-dotenv
+PyGetWindow
+Pillow
+mss
