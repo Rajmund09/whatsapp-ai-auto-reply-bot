@@ -19,9 +19,11 @@ SEND_BUTTON = (1873, 1089)
 # Bot Persona
 BOT_NAME = "Aryan" # You can change this to your preferred name
 
-# =========================
-# GROQ CLIENT SETUP
-# =========================
+from dotenv import load_dotenv
+
+# Load environment variables from .env
+load_dotenv()
+
 client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # =========================
