@@ -16,12 +16,13 @@ CLICK_OUTSIDE = (1013, 1093)
 MESSAGE_BOX = (1013, 1093)
 SEND_BUTTON = (1873, 1089)
 
+# Bot Persona
+BOT_NAME = "Aryan" # You can change this to your preferred name
+
 # =========================
 # GROQ CLIENT SETUP
 # =========================
-client = Groq(
-    api_key=os.getenv("GROQ_API_KEY")
-)
+client = Groq(api_key=os.getenv("GROQ_API_KEY"))
 
 # =========================
 # CHAT CHANGE DETECTION
@@ -56,32 +57,32 @@ def send_message(text):
     pyautogui.click(*SEND_BUTTON)
 
 def get_ai_reply(chat_history):
-    completion = client.chat.completions.create(
-        model="llama-3.1-8b-instant",
-        messages=[
-            {
-                "role": "system",
-               "content": (
-    "You are person, a normal guy from , Odisha. "
-    "You speak ONLY one language per reply: "
-    "either simple English,  English. "
-    "Do NOT mix languages in one sentence. "
-    "If unsure which language to use, reply in simple english. "
-    "Talk like a real friend, very natural and casual. "
-    "Keep replies short (1–2 lines). "
-    "Reply ONLY to the last message."
-)
-
-            },
-            {
-                "role": "user",
-                "content": chat_history
-            }
-        ],
-        temperature=0.7,
-        max_tokens=120
+    system_prompt = (
+        f"You are {BOT_NAME}, a friendly and helpful guy from Odisha. "
+        "You are responding to messages on WhatsApp. "
+        "Talk like a real friend—natural, casual, and relatable. "
+        "Use a mix of simple English and Odia if it feels natural, or just English if the user is using it. "
+        "Keep replies short and concise (1-2 lines), like a real chat. "
+        "The chat history provided includes names and timestamps in various formats. "
+        "Ignore the formatting and focus on the latest message and the overall context. "
+        "IMPORTANT: Do NOT include your name or timestamps in your reply. "
+        "Just give the direct message text."
     )
-    return completion.choices[0].message.content.strip()
+    
+    try:
+        completion = client.chat.completions.create(
+            model="llama-3.1-8b-instant",
+            messages=[
+                {"role": "system", "content": system_prompt},
+                {"role": "user", "content": f"Here is the recent chat history:\n\n{chat_history}\n\nPlease provide a natural reply to the last message."}
+            ],
+            temperature=0.8,
+            max_tokens=150
+        )
+        return completion.choices[0].message.content.strip()
+    except Exception as e:
+        print(f"Error getting AI reply: {e}")
+        return ""
 
 # =========================
 # BOT SELF-MESSAGE CHECK
@@ -90,7 +91,13 @@ def is_own_last_message(chat_text):
     global last_bot_reply
     if not last_bot_reply:
         return False
-    return chat_text.strip().endswith(last_bot_reply.strip())
+    
+    # Clean up both for comparison
+    clean_chat = chat_text.strip().lower()
+    clean_reply = last_bot_reply.strip().lower()
+    
+    # Check if the chat ends with our reply (ignoring minor variations)
+    return clean_reply in clean_chat[-len(clean_reply)-10:]
 
 # =========================
 # OPEN WHATSAPP
@@ -115,5 +122,13 @@ while True:
         continue
 
     reply = get_ai_reply(chat_history)
-    last_bot_reply = reply   # ✅ STORE BOT REPLY
-    send_message(reply)
+    if reply:
+        last_bot_reply = reply   # ✅ STORE BOT REPLY
+        
+        # Simulate typing time
+        typing_delay = len(reply) * 0.05 + 1 # 0.05s per char + 1s base
+        typing_time = min(max(typing_delay, 1), 4) # between 1 and 4 seconds
+        print(f"Simulating typing for {typing_time:.1f}s...")
+        time.sleep(typing_time)
+        
+        send_message(reply)
