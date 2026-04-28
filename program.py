@@ -125,24 +125,32 @@ def get_visual_update(img):
         print(f"Vision API Error: {e}")
         return None
 
-def get_ai_reply(last_msg):
+def get_ai_reply(last_msg, bot_previous_reply=""):
     system_prompt = (
-        f"You are {BOT_NAME}, a real human friend. "
-        "Talk like a normal person on WhatsApp—casual, relaxed, and relatable. "
-        "Use simple English, mix in Hindi or Odia naturally. "
-        "Keep replies very short and punchy (max 1-2 lines). "
-        "NEVER mention you are an AI. Just be a guy chatting."
+        f"You are {BOT_NAME}, a real human friend chatting on WhatsApp. "
+        "Talk in a casual, relaxed, and relatable way. Use conversational English, and you can mix in a little bit of casual Hindi (Hinglish). "
+        "Do NOT sound like a robot or customer service. "
+        "Keep replies very short, typically just 1 sentence or a few words. "
+        "NEVER mention you are an AI, a bot, or an assistant."
     )
     
+    # Provide conversation context if available
+    context = ""
+    if bot_previous_reply:
+        context = f"You recently said: '{bot_previous_reply}'\n"
+        
+    user_prompt = f"{context}Friend says: '{last_msg}'\n\nReply naturally to your friend:"
+
     try:
         completion = client.chat.completions.create(
-            model="llama-3.1-8b-instant",
+            # Using a smarter model for much better conversational quality
+            model="llama-3.3-70b-versatile",
             messages=[
                 {"role": "system", "content": system_prompt},
-                {"role": "user", "content": f"Friend says: {last_msg}\n\nReply naturally as a friend."}
+                {"role": "user", "content": user_prompt}
             ],
-            temperature=0.85,
-            max_tokens=100
+            temperature=0.7,
+            max_tokens=50
         )
         return completion.choices[0].message.content.strip()
     except Exception as e:
@@ -178,7 +186,7 @@ def main():
             new_msg = get_visual_update(img)
             if new_msg:
                 print(f"New message seen: {new_msg}")
-                reply = get_ai_reply(new_msg)
+                reply = get_ai_reply(new_msg, bot_previous_reply=last_replied_msg)
                 
                 if reply:
                     # Click message box to ensure focus
