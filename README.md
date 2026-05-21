@@ -10,7 +10,7 @@ The bot acts as a real human friend, utilizing computer vision to read incoming 
 
 - **👁️ Vision-Based Message Reading**: Uses Groq's Vision LLM (`meta-llama/llama-4-scout-17b-16e-instruct`) to analyze screenshots of the WhatsApp chat window, dynamically detecting and parsing the last incoming message. No WhatsApp API or browser automation library (like Selenium/Puppeteer) is required!
 - **⚡ Visual Hashing (API Optimization)**: Computes MD5 hashes of the chat window capture. It only contacts the Vision API when a visual change is detected, saving API tokens and reducing network overhead.
-- **🗣️ Natural & Context-Aware Conversational AI**: Powered by Groq's `llama-3.3-70b-versatile` model. It maintains a short chat context (remembers its own previous reply), talks in casual Hinglish/English, and adopts a customizable human persona (defaults to **"Aryan"**).
+- **🗣️ Natural & Context-Aware Conversational AI**: Powered by Groq's `llama-3.3-70b-versatile` model. It maintains a short chat context (remembers its own previous reply), talks in casual Hinglish/English/Odia, and adopts a customizable human persona (defaults to **"Aryan"**). It is designed to match authentic texting behaviors (lowercase, no ending periods, slang).
 - **🗔 Automated Window Focus**: Automatically searches for, restores, and activates the official WhatsApp desktop window before executing actions.
 - **⌨️ Instant Clipboard Injection**: Copies generated replies directly to the clipboard (`pyperclip`) and pastes them (`ctrl + v`), ensuring fast, reliable delivery and avoiding slow keystroke simulation.
 
@@ -45,6 +45,17 @@ Create a `.env` file in the root directory of the project. Here are the variable
 > - `CHECK_INTERVAL`: How often the bot scans for changes (default: `5` seconds).
 > - `VISION_MODEL`: The multimodal model used to read messages.
 > - Chat area offsets (`CHAT_AREA_LEFT`, `CHAT_AREA_TOP`, etc.) to match your layout.
+
+---
+
+## 💬 Prompt Design & Texting Behavior
+
+The bot features a highly optimized system prompt that instructs the LLM to behave like a real human friend rather than an AI assistant. Key rules include:
+- **Texting Style**: Writes in mostly lowercase and avoids ending periods (`.`) which typically make replies look robotic or passive-aggressive.
+- **Tone**: A relaxed, lazy, and sometimes dry college-student vibe.
+- **Multilingual (Hinglish/Odia)**: Automatically responds in natural Hinglish (conversational Hindi mixed with English) or simple English. It also handles local language inputs like Odia (e.g., matching Odia queries like *"kan chalichi"* with natural Odia responses).
+- **Anti-Helper Behavior**: Refuses technical utility tasks (like writing code or essays) lazily (e.g., *"bhai google krle na 😂"*).
+- **Active AI Denial**: Will humorously deny being an AI or robot if asked.
 
 ---
 
